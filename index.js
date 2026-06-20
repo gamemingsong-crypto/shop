@@ -36,10 +36,11 @@ const client = new Client({
 // =========================================================
 // 📌 [จุดที่ต้องแก้ไข] ใส่ไอดีจากเซิร์ฟเวอร์ดิสคอร์ดของคุณตรงนี้ครับ
 // =========================================================
-const PAYMENT_CHANNEL_ID = '1511625751609479220';  // ห้องที่ให้ทุกคนส่งรูปสลิปเข้ามา
-const SUPPORTER_ROLE_ID  = '1511222754437763105';   // ยศที่จะแจกเมื่อแอดมินกดอนุมัติ
-const ADMIN_ROLE_ID      = '1511072295320293546';        // ยศของแอดมินหรือทีมงานที่จะมียกสิทธิ์กดปุ่มได้
-
+const PAYMENT_CHANNEL_ID = '1511625751609479220'; // ห้องที่ให้ทุกคนส่งรูปสลิปเข้ามา
+const SUPPORTER_ROLE_ID  = '1511222754437763105'; // ยศที่จะแจกเมื่อแอดมินกดอนุมัติ
+const ADMIN_ROLE_ID      = '1511072295320293546'; // ยศของแอดมินหรือทีมงานที่จะมียกสิทธิ์กดปุ่มได้
+const MOD_ROLE_ID        = '1508699693486575707'; // เพิ่มบรรทัดนี้ลงไป
+    
 client.once('ready', () => {
     console.log(`🚀 Bot is ready! Logged in as ${client.user.tag}`);
 });
@@ -226,7 +227,8 @@ client.on('interactionCreate', async (interaction) => {
     // แอดมินกดปุ่ม อนุมัติยศ
     if (interaction.customId.startsWith('admin_approve_')) {
         // ดักสิทธิ์: คนกดต้องมียศ ADMIN_ROLE_ID
-        if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID)) {
+        if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID) && !interaction.member.roles.cache.has(MOD_ROLE_ID)) {
+        return await interaction.reply({
             return await interaction.reply({ content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดอนุมัติครับ!', ephemeral: true });
         }
 
@@ -257,10 +259,14 @@ client.on('interactionCreate', async (interaction) => {
 
     // แอดมินกดปุ่ม ปฏิเสธ
     if (interaction.customId.startsWith('admin_reject_')) {
-        // ดักสิทธิ์แอดมินเช่นกัน
-        if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID)) {
-            return await interaction.reply({ content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดปฏิเสธครับ!', ephemeral: true });
-        }
+    
+    // 💡 ปรับให้ MOD_ROLE_ID มีสิทธิ์กดปุ่มปฏิเสธได้ด้วยแบบนี้ครับ
+    if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID) && !interaction.member.roles.cache.has(MOD_ROLE_ID)) {
+        return await interaction.reply({ 
+            content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดปฏิเสธครับ!', 
+            ephemeral: true 
+        });
+    }
 
         const userId = interaction.customId.split('_')[2];
         const guild = interaction.guild;
