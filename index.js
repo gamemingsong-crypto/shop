@@ -177,7 +177,7 @@ client.on('interactionCreate', async (interaction) => {
 
     // กดเลือก ธนาคาร (บอทสร้าง QR Code ส่งให้ดูเฉพาะตัว)
     if (interaction.customId === 'pay_bank_qrcode') {
-        const promptpayNumber = process.env.MY_WALLET_NUMBER || '0812345678'; 
+        const promptpayNumber = process.env.MY_WALLET_NUMBER || '0961945339'; 
         const amount = 150; 
         const qrCodeUrl = `https://promptpay.io/${promptpayNumber}/${amount}.png`;
 
