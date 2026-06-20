@@ -226,11 +226,10 @@ client.on('interactionCreate', async (interaction) => {
     
     // แอดมินกดปุ่ม อนุมัติยศ
     if (interaction.customId.startsWith('admin_approve_')) {
-        // ดักสิทธิ์: คนกดต้องมียศ ADMIN_ROLE_ID
-        if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID) && !interaction.member.roles.cache.has(MOD_ROLE_ID)) {
-        return await interaction.reply({
-            return await interaction.reply({ content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดอนุมัติครับ!', ephemeral: true });
-        }
+    // ดักสิทธิ์: คนกดต้องมีสิทธิ์ยศ ADMIN_ROLE_ID หรือ MOD_ROLE_ID
+    if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID) && !interaction.member.roles.cache.has(MOD_ROLE_ID)) {
+        return await interaction.reply({ content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดอนุมัติครับ!', ephemeral: true });
+    }
 
         const userId = interaction.customId.split('_')[2];
         const guild = interaction.guild;
