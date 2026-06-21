@@ -120,13 +120,17 @@ client.on('messageCreate', async (message) => {
             .setImage(slipImageUrl) // สั่งดึงรูปภาพมาโชว์ใน Embed
             .setTimestamp();
 
-        // แนบปุ่ม อนุมัติ / ปฏิเสธ ห้อยไอดีของผู้ส่งหลักฐานไว้หลังปุ่ม
+        // แนบปุ่ม อนุมัติ / ยืนยันยอด / ปฏิเสธ ห้อยไอดีของผู้ส่งหลักฐานไว้หลังปุ่ม
         const adminButtons = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`admin_approve_${message.author.id}`)
                     .setLabel('✅ อนุมัติยศ')
                     .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId(`admin_confirm_${message.author.id}`) // 👈 ปุ่มใหม่!
+                    .setLabel('💰 ยืนยันยอด (ไม่แจกยศ)')
+                    .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId(`admin_reject_${message.author.id}`)
                     .setLabel('❌ ปฏิเสธ')
@@ -255,7 +259,31 @@ client.on('interactionCreate', async (interaction) => {
                 await interaction.reply({ content: '❌ บอทไม่มีสิทธิ์แจกยศนี้ กรุณาตั้งค่าสิทธิ์ลำดับยศ (Role Hierarchy) ของบอทให้สูงกว่ายศที่จะแจกในระบบ Discord ครับ', ephemeral: true });
             });
     }
+// แอดมินกดปุ่ม ยืนยันยอด (ไม่แจกยศ)
+    if (interaction.customId.startsWith('admin_confirm_')) {
+        // ดักสิทธิ์แอดมิน
+        if (!interaction.member.roles.cache.has(ADMIN_ROLE_ID)) {
+            return await interaction.reply({ content: '❌ เฉพาะแอดมินหรือผู้ดูแลระบบที่มียศกำหนดเท่านั้นที่มีสิทธิ์กดครับ!', ephemeral: true });
+        }
 
+        const userId = interaction.customId.split('_')[2];
+        const guild = interaction.guild;
+        const member = await guild.members.fetch(userId).catch(() => null);
+
+        // เปลี่ยนสีกล่องเป็นสีฟ้า เพื่อให้รู้ว่าแค่ยืนยันยอดเฉยๆ
+        const updatedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
+            .setColor('#0099ff') 
+            .setTitle('💰 รับทราบยอดสนับสนุนเรียบร้อยแล้ว')
+            .setDescription(interaction.message.embeds[0].description + `\n\n**ผู้ตรวจสอบ:** <@${interaction.user.id}>`);
+        
+        // อัปเดตข้อความและลบปุ่มออก
+        await interaction.update({ embeds: [updatedEmbed], components: [] });
+
+        // ทัก DM ไปขอบคุณลูกค้า (แต่ไม่ได้บอกว่าได้ยศ)
+        if (member) {
+            await member.send('💰 **รับทราบยอดสนับสนุน!** แอดมินได้ตรวจสอบสลิปของคุณเรียบร้อยแล้ว ขอบคุณที่สนับสนุนเซิร์ฟเวอร์ของเรานะครับ!').catch(() => null);
+        }
+    }
     // แอดมินกดปุ่ม ปฏิเสธ
     if (interaction.customId.startsWith('admin_reject_')) {
     
