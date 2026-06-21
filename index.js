@@ -10,7 +10,8 @@ import {
     ButtonStyle,
     ModalBuilder,
     TextInputBuilder,
-    TextInputStyle
+    TextInputStyle,
+    ActivityType
 } from 'discord.js';
 
 // ==========================================
@@ -43,6 +44,9 @@ const MOD_ROLE_ID        = '1508699693486575707'; // เพิ่มบรรท
     
 client.once('ready', () => {
     console.log(`🚀 Bot is ready! Logged in as ${client.user.tag}`);
+client.user.setActivity('รับยศอัตโนมัติ | ชำระเงินอัตโนมัติ', { 
+        type: ActivityType.Watching 
+    });
 });
 
 // ==========================================
